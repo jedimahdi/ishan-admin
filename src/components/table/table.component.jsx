@@ -19,7 +19,7 @@ const Table = ({ data, url, title, names, handleDeleteItem, history }) => {
           </div>
         </div>
       </div>
-      {data ? (
+      {data && data.length !== 0 ? (
         <div className="table-responsive">
           <table className="table table-striped table-sm">
             <thead>

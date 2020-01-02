@@ -1,31 +1,31 @@
-import React, { useEffect, useContext } from 'react';
-import { Switch, Route } from 'react-router-dom';
-import moment from 'jalali-moment';
+import React, { useEffect, useContext } from "react";
+import { Switch, Route } from "react-router-dom";
+import moment from "jalali-moment";
 
-import apiAuth from './utils/api_auth';
+import apiAuth from "./utils/api_auth";
 
-import { UserContext } from './providers/user/user.provider';
+import { UserContext } from "./providers/user/user.provider";
 
-import './App.css';
+import "./App.css";
 
-import AdminPage from './pages/admin_page/admin_page.component';
-import LoginPage from './pages/login/login.component';
+import AdminPage from "./pages/admin_page/admin_page.component";
+import LoginPage from "./pages/login/login.component";
 
 // import requireAuth from './components/middlewares/require_auth';
 // import noRequireAuth from './components/middlewares/no_require_auth';
 
 function App() {
   const { currentUser, setCurrentUser } = useContext(UserContext);
-  moment.locale('fa', { useGregorianParser: true });
+  moment.locale("fa", { useGregorianParser: true });
 
   useEffect(() => {
-    if (!currentUser && localStorage.getItem('user')) {
+    if (!currentUser && localStorage.getItem("user")) {
       apiAuth
-        .get('users/profile')
+        .get("users/profile")
         .then(res => {
           setCurrentUser({
             ...res.data,
-            accessToken: localStorage.getItem('user')
+            accessToken: localStorage.getItem("user")
           });
         })
         .catch(err => {
