@@ -1,80 +1,104 @@
-import React, { useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 
-import useForminput from '../../../effects/use-form-input.effect';
+import ErrorModal from '../../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../../shared/components/UIElements/LoadingSpinner';
+import Input from '../../../shared/components/FormElements/Input';
+import Button from '../../../shared/components/FormElements/Button';
+import Card from '../../../shared/components/UIElements/Card';
+import ImageUpload from '../../../shared/components/FormElements/ImageUpload';
+import {
+  VALIDATOR_REQUIRE,
+  VALIDATOR_MINLENGTH
+} from '../../../shared/util/validators';
+import { useForm } from '../../../shared/hooks/form-hook';
+import { useHttpClient } from '../../../shared/hooks/http-hook';
+import { AuthContext } from '../../../shared/contexts/auth-context';
+import { API_BASE_URL } from '../../../shared/util/vars';
 
-import FormInput from '../../../components/form-input/form-input.component';
+const CreateArticlePage = () => {
+  const auth = useContext(AuthContext);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [formState, inputChangeHandler] = useForm(
+    {
+      title: {
+        value: '',
+        isValid: false
+      },
+      text: {
+        value: '',
+        isValid: false
+      },
+      file: {
+        value: null,
+        isValid: false
+      }
+    },
+    false
+  );
 
-import auth_api from '../../../utils/api_auth';
+  const history = useHistory();
 
-const CreateArticlePage = ({ history }) => {
-  const title = useForminput('');
-  const text = useForminput('');
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [success, setSuccess] = useState(false);
-
-  const handleSubmit = event => {
+  const articleSubmitHandler = async event => {
     event.preventDefault();
-    let data = new FormData();
-    data.append('file', selectedFile);
-    data.append('title', title.value);
-    data.append('text', text.value);
+    try {
+      const formData = new FormData();
+      formData.append('title', formState.inputs.title.value);
+      formData.append('text', formState.inputs.text.value);
+      formData.append('file', formState.inputs.file.value);
 
-    auth_api.post('articles', data).then(res => {
-      setSuccess(true);
-    });
-  };
-
-  const onImageChange = event => {
-    setSelectedFile(event.target.files[0]);
+      await sendRequest(`${API_BASE_URL}articles`, 'POST', formData, {
+        Authorization: 'Bearer ' + auth.token
+      });
+      history.push('/articles');
+    } catch (err) {}
   };
 
   return (
-    <div className="create-article">
-      {success ? <div className="alert alert-success mt-4">Success</div> : null}
-      <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h2>Create Article</h2>
-      </div>
+    <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
 
-      <FormInput label="Title" name="title" {...title} />
+      <div className="create-article my-container">
+        <Card>
+          <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h2>Create Article</h2>
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="textInput">Text</label>
-        <textarea
-          className="form-control"
-          name="text"
-          {...text}
-          id="textInput"
-          rows="3"
-        />
-      </div>
+          <form onSubmit={articleSubmitHandler}>
+            {isLoading && <LoadingSpinner asOverlay />}
+            <Input
+              id="title"
+              element="input"
+              type="text"
+              label="Title"
+              onInput={inputChangeHandler}
+              validators={[VALIDATOR_REQUIRE()]}
+              errorText="Please enter a valid title"
+            />
 
-      <div className="custom-file mb-4">
-        <input
-          type="file"
-          className="custom-file-input"
-          id="customFile"
-          name="file"
-          onChange={onImageChange}
-        />
-        <label className="custom-file-label" htmlFor="customFile">
-          Choose image file
-        </label>
-      </div>
+            <Input
+              id="text"
+              element="textarea"
+              label="Text"
+              onInput={inputChangeHandler}
+              validators={[VALIDATOR_MINLENGTH(5)]}
+              errorText="Please enter a valid text (at least 5 characters)"
+            />
 
-      <div className="btn-group">
-        <button onClick={handleSubmit} className="btn btn-dark">
-          Create
-        </button>
-        <button
-          onClick={() => history.push('/articles')}
-          className="btn btn-danger"
-        >
-          Cancel
-        </button>
+            <ImageUpload
+              id="file"
+              onInput={inputChangeHandler}
+              errorText="Please provide a image."
+            />
+
+            <Button inverse type="submit" disabled={!formState.isValid}>
+              Create
+            </Button>
+          </form>
+        </Card>
       </div>
-    </div>
+    </React.Fragment>
   );
 };
 
-export default withRouter(CreateArticlePage);
+export default CreateArticlePage;

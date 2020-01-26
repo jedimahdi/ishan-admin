@@ -1,25 +1,36 @@
-import { useState, useEffect } from 'react';
-import useApi from './use-api';
+import { useState, useEffect, useContext } from 'react';
+import { useHttpClient } from '../shared/hooks/http-hook';
+import { API_BASE_URL } from '../shared/util/vars';
+import { AuthContext } from '../shared/contexts/auth-context';
 
 function useFetch(url) {
   const [data, setData] = useState(null);
-  const api = useApi();
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const auth = useContext(AuthContext);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await api.get(url);
-      setData(res.data);
+    const fetchArticles = async () => {
+      try {
+        const responseData = await sendRequest(`${API_BASE_URL}${url}`);
+        setData(responseData);
+      } catch (err) {}
     };
 
-    fetchData();
-  }, [url, api]);
+    fetchArticles();
+  }, [sendRequest, url]);
 
-  const handleDeleteItem = dataId => {
-    api.delete(`${url}/${dataId}`).then(console.log);
-    setData(data.filter(item => item._id !== dataId));
+  const handleDeleteItem = async id => {
+    try {
+      await sendRequest(`${API_BASE_URL}${url}/${id}`, 'DELETE', null, {
+        Authorization: 'Bearer ' + auth.token
+      });
+    } catch (err) {}
+    setData(data.filter(item => item._id !== id));
+    // api.delete(`${url}/${dataId}`).then(console.log);
   };
 
-  return { data, handleDeleteItem };
+  console.log(data);
+  return { data, handleDeleteItem, isLoading, error, clearError };
 }
 
 export default useFetch;

@@ -1,0 +1,58 @@
+.dialogue {
+  z-index: 200;
+  position: fixed;
+  top: 22vh;
+  left: 10%;
+  width: 80%;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  border-radius: 8px;
+}
+
+.dialogue__header {
+  width: 100%;
+  padding: 1rem 0.5rem;
+  background: #2a006e;
+  color: white;
+}
+
+.dialogue__header h2 {
+  margin: 0.5rem;
+}
+
+.dialogue__content {
+  padding: 1rem 0.5rem;
+}
+
+.dialogue__footer {
+  padding: 1rem 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .dialogue {
+    left: calc(50% - 20rem);
+    width: 40rem;
+  }
+}
+
+.dialogue-enter {
+  transform: translateY(-10rem);
+  opacity: 0;
+}
+
+.dialogue-enter-active {
+  transform: translateY(0);
+  opacity: 1;
+  transition: all 200ms;
+}
+
+.dialogue-exit {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.dialogue-exit-active {
+  transform: translateY(-10rem);
+  opacity: 0;
+  transition: all 200ms;
+}

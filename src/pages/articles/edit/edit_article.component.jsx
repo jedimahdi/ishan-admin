@@ -1,90 +1,140 @@
-import React from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 
-import FormInput from '../../../components/form-input/form-input.component';
+import Card from '../../../shared/components/UIElements/Card';
+import ErrorModal from '../../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../../shared/components/UIElements/LoadingSpinner';
+import Input from '../../../shared/components/FormElements/Input';
+import Button from '../../../shared/components/FormElements/Button';
+import {
+  VALIDATOR_REQUIRE,
+  VALIDATOR_MINLENGTH
+} from '../../../shared/util/validators';
+import { useForm } from '../../../shared/hooks/form-hook';
+import { useHttpClient } from '../../../shared/hooks/http-hook';
+import { AuthContext } from '../../../shared/contexts/auth-context';
+import { API_BASE_URL } from '../../../shared/util/vars';
 
-import API from '../../../utils/api';
+const EditArticlePage = () => {
+  const auth = useContext(AuthContext);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [loadedArticle, setLoadedArticle] = useState();
+  const articleId = useParams().articleId;
+  const history = useHistory();
 
-class EditArticlePage extends React.Component {
-  constructor(props) {
-    super(props);
+  const [formState, inputHandler, setFormData] = useForm(
+    {
+      title: {
+        value: '',
+        isValid: false
+      },
+      text: {
+        value: '',
+        isValid: false
+      }
+    },
+    false
+  );
 
-    this.state = {
-      title: '',
-      text: '',
-      success: false
+  useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        const responseData = await sendRequest(
+          `${API_BASE_URL}articles/${articleId}`
+        );
+        setLoadedArticle(responseData);
+        setFormData(
+          {
+            title: { value: responseData.title, isValid: true },
+            text: { value: responseData.text, isValid: true }
+          },
+          true
+        );
+      } catch (err) {}
     };
-  }
 
-  componentDidMount() {
-    API.get(`articles/${this.props.match.params.articleId}`).then(res => {
-      const { title, text } = res.data;
-      this.setState({ title, text });
-    });
-  }
+    fetchArticle();
+  }, [sendRequest, articleId, setFormData]);
 
-  handleChange = event => {
-    const { name, value } = event.target;
-
-    this.setState({ [name]: value });
-  };
-
-  handleSubmit = event => {
+  const updateSubmitHandler = async event => {
     event.preventDefault();
-
-    const { title, text } = this.state;
-
-    API.patch(`articles/${this.props.match.params.articleId}`, {
-      title,
-      text
-    }).then(res => {
-      this.setState({ success: true });
-    });
+    try {
+      await sendRequest(
+        `${API_BASE_URL}articles/${articleId}`,
+        'PATCH',
+        JSON.stringify({
+          title: formState.inputs.title.value,
+          text: formState.inputs.text.value
+        }),
+        {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + auth.token
+        }
+      );
+      history.push('/articles');
+    } catch (err) {}
   };
 
-  render() {
+  if (isLoading) {
     return (
-      <div className="edit-article">
-        {this.state.success ? (
-          <div className="alert alert-success mt-4">Success</div>
-        ) : null}
-        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h2>Edit Article</h2>
-        </div>
-
-        <FormInput
-          label="Title"
-          name="title"
-          value={this.state.title}
-          handleChange={this.handleChange}
-        />
-
-        <div className="form-group">
-          <label htmlFor="textInput">Text</label>
-          <textarea
-            className="form-control"
-            name="text"
-            value={this.state.text}
-            onChange={this.handleChange}
-            id="textInput"
-            rows="6"
-          />
-        </div>
-
-        <div className="btn-group">
-          <button onClick={this.handleSubmit} className="btn btn-dark">
-            Update
-          </button>
-          <button
-            onClick={() => this.props.history.push('/articles')}
-            className="btn btn-danger"
-          >
-            Cancel
-          </button>
-        </div>
+      <div className="center">
+        <LoadingSpinner />
       </div>
     );
   }
-}
 
-export default withRouter(EditArticlePage);
+  if (!loadedArticle && !error) {
+    return (
+      <div className="center">
+        <Card>
+          <h2>Could not find place!</h2>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
+      {!isLoading && loadedArticle && (
+        <div className="edit-article my-container">
+          <Card>
+            <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+              <h2>Edit Article</h2>
+            </div>
+
+            <form onSubmit={updateSubmitHandler}>
+              <Input
+                id="title"
+                element="input"
+                type="text"
+                label="Title"
+                validators={[VALIDATOR_REQUIRE()]}
+                errorText="Please enter a valid title."
+                onInput={inputHandler}
+                initialValue={loadedArticle.title}
+                initialValid={true}
+              />
+
+              <Input
+                id="text"
+                element="textarea"
+                label="Text"
+                validators={[VALIDATOR_MINLENGTH(5)]}
+                errorText="Please enter a valid text (min. 5 characters)."
+                onInput={inputHandler}
+                initialValue={loadedArticle.text}
+                initialValid={true}
+              />
+              <Button type="submit" disabled={!formState.isValid}>
+                UPDATE ARTICLE
+              </Button>
+            </form>
+          </Card>
+        </div>
+      )}
+    </React.Fragment>
+  );
+};
+
+export default EditArticlePage;

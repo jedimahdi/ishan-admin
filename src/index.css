@@ -1,38 +1,47 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Open Sans', sans-serif;
+}
+
 body {
-  font-size: 0.875rem;
+  margin: 0;
+  background: #4d4d4d;
 }
 
-.feather {
-  width: 16px;
-  height: 16px;
-  vertical-align: text-bottom;
+.slide-in-left-enter {
+  transform: translateX(-100%);
 }
 
-/*
- * Content
- */
-
-[role='main'] {
-  padding-top: 133px; /* Space for fixed navbar */
+.slide-in-left-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: all 200ms;
 }
 
-@media (min-width: 768px) {
-  [role='main'] {
-    padding-top: 48px; /* Space for fixed navbar */
-  }
+.slide-in-left-exit {
+  transform: translateX(0%);
+  opacity: 1;
 }
 
-.bd-placeholder-img {
-  font-size: 1.125rem;
-  text-anchor: middle;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+.slide-in-left-exit-active {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: all 200ms;
 }
 
-@media (min-width: 768px) {
-  .bd-placeholder-img-lg {
-    font-size: 3.5rem;
-  }
+.center {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.my-container {
+  margin: 1rem auto;
+  width: 90%;
 }

@@ -1,58 +1,71 @@
-import React, { useEffect, useContext } from "react";
-import { Switch, Route } from "react-router-dom";
-import moment from "jalali-moment";
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect
+} from 'react-router-dom';
 
-import apiAuth from "./utils/api_auth";
+import LoginPage from './pages/login/login.component';
+import DashboardPage from './pages/dashboard/dashboard.component';
+import SettingsPage from './pages/settings/settings.component';
+import ArticlesPage from './pages/articles/list/list_articles.component';
+import CreateArticlePage from './pages/articles/create/create_article.component';
+import EditArticlePage from './pages/articles/edit/edit_article.component';
+import CommentsPage from './pages/comments/list/list_comments.component';
+import CreateCommentPage from './pages/comments/create/create_comment.component';
+import EditCommentPage from './pages/comments/edit/edit_comment.component';
+import AdminsPage from './pages/admins/admins.component';
+import MainNavigation from './shared/components/Navigation/MainNavigation';
 
-import { UserContext } from "./providers/user/user.provider";
+import { AuthContext } from './shared/contexts/auth-context';
+import { useAuth } from './shared/hooks/auth-hook';
 
-import "./App.css";
+const App = () => {
+  const { token, login, logout, userId } = useAuth();
 
-import AdminPage from "./pages/admin_page/admin_page.component";
-import LoginPage from "./pages/login/login.component";
+  let routes;
 
-// import requireAuth from './components/middlewares/require_auth';
-// import noRequireAuth from './components/middlewares/no_require_auth';
-
-function App() {
-  const { currentUser, setCurrentUser } = useContext(UserContext);
-  moment.locale("fa", { useGregorianParser: true });
-
-  useEffect(() => {
-    if (!currentUser && localStorage.getItem("user")) {
-      apiAuth
-        .get("users/profile")
-        .then(res => {
-          setCurrentUser({
-            ...res.data,
-            accessToken: localStorage.getItem("user")
-          });
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    }
-  }, [currentUser, setCurrentUser]);
-
-  if (currentUser) {
-    return (
-      <div>
-        <Switch>
-          {/* <Route exact path="/login" component={LoginPage} /> */}
-          <Route path="/" component={AdminPage} />
-        </Switch>
-      </div>
+  if (token) {
+    routes = (
+      <Switch>
+        <Route exact path="/" component={DashboardPage} />
+        <Route exact path="/articles" component={ArticlesPage} />
+        <Route path="/articles/create" component={CreateArticlePage} />
+        <Route path="/articles/edit/:articleId" component={EditArticlePage} />
+        <Route exact path="/comments" component={CommentsPage} />
+        <Route path="/comments/create" component={CreateCommentPage} />
+        <Route path="/comments/edit/:commentId" component={EditCommentPage} />
+        <Route exact path="/admins" component={AdminsPage} />
+        <Route path="/settings" component={SettingsPage} />
+        <Redirect to="/" />
+      </Switch>
     );
   } else {
-    return (
-      <div>
-        <Switch>
-          <Route exact path="/login" component={LoginPage} />
-          {/* <Route path="/" component={AdminPage} /> */}
-        </Switch>
-      </div>
+    routes = (
+      <Switch>
+        <Route exact path="/login" component={LoginPage} />
+        <Redirect to="/login" />
+      </Switch>
     );
   }
-}
+
+  return (
+    <AuthContext.Provider
+      value={{
+        isLoggedIn: !!token,
+        token: token,
+        userId: userId,
+        login: login,
+        logout: logout
+      }}
+    >
+      <Router basename={process.env.PUBLIC_URL}>
+        <MainNavigation />
+        <main>{routes}</main>
+      </Router>
+    </AuthContext.Provider>
+  );
+};
 
 export default App;

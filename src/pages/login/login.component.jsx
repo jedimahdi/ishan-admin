@@ -1,79 +1,90 @@
 import React, { useContext } from 'react';
-import API from '../../utils/api';
 
-import useFormInput from '../../effects/use-form-input.effect';
-
-import { UserContext } from '../../providers/user/user.provider';
-
+import Card from '../../shared/components/UIElements/Card';
+import Input from '../../shared/components/FormElements/Input';
+import Button from '../../shared/components/FormElements/Button';
+import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
+import {
+  VALIDATOR_EMAIL,
+  VALIDATOR_MINLENGTH
+} from '../../shared/util/validators';
+import { useForm } from '../../shared/hooks/form-hook';
+import { useHttpClient } from '../../shared/hooks/http-hook';
+import { API_BASE_URL } from '../../shared/util/vars';
+import { AuthContext } from '../../shared/contexts/auth-context';
 import './login.styles.scss';
 
 const LoginPage = () => {
-  const email = useFormInput('');
-  const password = useFormInput('');
-  const { setCurrentUser } = useContext(UserContext);
+  const auth = useContext(AuthContext);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
-  const handleSubmit = event => {
+  const [formState, inputHandler] = useForm(
+    {
+      email: {
+        value: '',
+        isValid: false
+      },
+      password: {
+        value: '',
+        isValid: false
+      }
+    },
+    false
+  );
+
+  const handleSubmit = async event => {
     event.preventDefault();
 
-    API.post('auth/login', {
-      email: email.value,
-      password: password.value
-    }).then(res => {
-      setCurrentUser({
-        ...res.data.user,
-        accessToken: res.data.token.accessToken
-      });
-      localStorage.setItem('user', res.data.token.accessToken);
-    });
+    try {
+      const responseData = await sendRequest(
+        `${API_BASE_URL}auth/login`,
+        'POST',
+        JSON.stringify({
+          email: formState.inputs.email.value,
+          password: formState.inputs.password.value
+        }),
+        {
+          'Content-Type': 'application/json'
+        }
+      );
+
+      auth.login(responseData.user.id, responseData.token.accessToken);
+    } catch (err) {}
   };
 
   return (
-    <div className="login-container">
-      <form className="form-signin" onSubmit={handleSubmit}>
-        <img
-          className="mb-4"
-          src="https://getbootstrap.com/docs/4.4/assets/brand/bootstrap-solid.svg"
-          alt=""
-          width="72"
-          height="72"
-        />
-        <h1 className="h3 mb-3 font-weight-normal">Please sign in</h1>
-        <label htmlFor="inputEmail" className="sr-only">
-          Email address
-        </label>
-        <input
-          type="email"
-          id="inputEmail"
-          className="form-control"
-          placeholder="Email address"
-          name="email"
-          {...email}
-          required
-          autoFocus
-        />
-        <label htmlFor="inputPassword" className="sr-only">
-          Password
-        </label>
-        <input
-          type="password"
-          id="inputPassword"
-          className="form-control"
-          placeholder="Password"
-          name="password"
-          {...password}
-          required
-        />
-        <div className="checkbox mb-3">
-          <label>
-            <input type="checkbox" value="remember-me" /> Remember me
-          </label>
-        </div>
-        <button className="btn btn-lg btn-primary btn-block" type="submit">
-          Sign in
-        </button>
-        <p className="mt-5 mb-3 text-muted">&copy; 2017-2019</p>
-      </form>
-    </div>
+    <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
+      <Card className="authentication">
+        {isLoading && <LoadingSpinner asOverlay />}
+        <h2>Login Required</h2>
+        <hr />
+        <form className="form-signi" onSubmit={handleSubmit}>
+          <Input
+            element="input"
+            id="email"
+            type="email"
+            label="E-Mail"
+            validators={[VALIDATOR_EMAIL()]}
+            errorText="Please enter a valid email"
+            onInput={inputHandler}
+          />
+          <Input
+            element="input"
+            id="password"
+            type="password"
+            label="Password"
+            validators={[VALIDATOR_MINLENGTH(6)]}
+            errorText="Please enter a valid password, at least 6 characters."
+            onInput={inputHandler}
+          />
+          <Button type="submit" disabled={!formState.isValid}>
+            LOGIN
+          </Button>
+        </form>
+      </Card>
+    </React.Fragment>
   );
 };
 

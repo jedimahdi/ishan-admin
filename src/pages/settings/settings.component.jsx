@@ -4,6 +4,7 @@ import MultiSelect from '@khanacademy/react-multi-select';
 import FormInput from '../../components/form-input/form-input.component';
 
 import API from '../../utils/api';
+import Card from '../../shared/components/UIElements/Card';
 
 class SettingsPage extends React.Component {
   constructor() {
@@ -142,25 +143,26 @@ class SettingsPage extends React.Component {
 
   render() {
     return (
-      <div className="settings">
-        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h2>Settings</h2>
-        </div>
+      <div className="settings my-container">
+        <Card>
+          <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h2>Settings</h2>
+          </div>
 
-        {this.state.settings.map(setting => (
-          <div className="row align-items-center" key={setting._id}>
-            <div className="col-md-12">
-              <FormInput
-                label={setting.key.split('_').join(' ')}
-                name={setting.key}
-                onChange={this.handleSettingInputChange}
-                value={
-                  this.state.settings.find(s => s.key === setting.key).value
-                }
-                readOnly={setting.readonly}
-              />
-            </div>
-            {/* <div className="col-md-1">
+          {this.state.settings.map(setting => (
+            <div className="row align-items-center" key={setting._id}>
+              <div className="col-md-12">
+                <FormInput
+                  label={setting.key.split('_').join(' ')}
+                  name={setting.key}
+                  onChange={this.handleSettingInputChange}
+                  value={
+                    this.state.settings.find(s => s.key === setting.key).value
+                  }
+                  readOnly={setting.readonly}
+                />
+              </div>
+              {/* <div className="col-md-1">
               <button
                 type="button"
                 className="btn btn-light"
@@ -169,62 +171,63 @@ class SettingsPage extends React.Component {
                 <i className="fa fa-window-close"></i>
               </button>
             </div> */}
-          </div>
-        ))}
+            </div>
+          ))}
 
-        <div className="form-group">
-          <label htmlFor="selectArticle">Select articles for homepage</label>
-          <MultiSelect
-            options={this.state.articles}
-            selected={this.state.selected_articles}
-            onSelectedChanged={this.onSelectArticleChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="selectInsComment">
-            Select instructor comments for homepage
-          </label>
-
-          <MultiSelect
-            options={this.state.ins_comments}
-            selected={this.state.selected_ins_comments}
-            onSelectedChanged={this.onSelectInsCommentChange}
-          />
-        </div>
-
-        <button onClick={this.handleSubmit} className="btn btn-dark">
-          Update Settings
-        </button>
-
-        <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h2>Create New Settings</h2>
-        </div>
-
-        <div className="row">
-          <div className="col-md-6">
-            <FormInput
-              label="Settings key"
-              name="key"
-              onChange={this.handleChange}
-              value={this.state.key}
+          <div className="form-group">
+            <label htmlFor="selectArticle">Select articles for homepage</label>
+            <MultiSelect
+              options={this.state.articles}
+              selected={this.state.selected_articles}
+              onSelectedChanged={this.onSelectArticleChange}
             />
           </div>
-          <div className="col-md-6">
-            <FormInput
-              label="Settings value"
-              name="value"
-              onChange={this.handleChange}
-              value={this.state.value}
+
+          <div className="form-group">
+            <label htmlFor="selectInsComment">
+              Select instructor comments for homepage
+            </label>
+
+            <MultiSelect
+              options={this.state.ins_comments}
+              selected={this.state.selected_ins_comments}
+              onSelectedChanged={this.onSelectInsCommentChange}
             />
           </div>
-        </div>
-        <button
-          onClick={this.handleCreateSettings}
-          className="btn btn-dark mb-4"
-        >
-          Create
-        </button>
+
+          <button onClick={this.handleSubmit} className="btn btn-dark">
+            Update Settings
+          </button>
+
+          <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h2>Create New Settings</h2>
+          </div>
+
+          <div className="row">
+            <div className="col-md-6">
+              <FormInput
+                label="Settings key"
+                name="key"
+                onChange={this.handleChange}
+                value={this.state.key}
+              />
+            </div>
+            <div className="col-md-6">
+              <FormInput
+                label="Settings value"
+                name="value"
+                onChange={this.handleChange}
+                value={this.state.value}
+              />
+            </div>
+          </div>
+          <button
+            onClick={this.handleCreateSettings}
+            className="btn btn-dark mb-4"
+          >
+            Create
+          </button>
+        </Card>
       </div>
     );
   }

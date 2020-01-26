@@ -1,29 +1,28 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
 
 import DashboardPage from '../dashboard/dashboard.component';
 import SettingsPage from '../settings/settings.component';
-
 import ArticlesPage from '../articles/list/list_articles.component';
 import CreateArticlePage from '../articles/create/create_article.component';
 import EditArticlePage from '../articles/edit/edit_article.component';
-
 import CommentsPage from '../comments/list/list_comments.component';
 import CreateCommentPage from '../comments/create/create_comment.component';
 import EditCommentPage from '../comments/edit/edit_comment.component';
-
 import AdminsPage from '../../pages/admins/admins.component';
 
 import Header from '../../components/header/header.component';
 import Sidebar from '../../components/sidebar/sidebar.component';
+import MainNavigation from '../../shared/components/Navigation/MainNavigation';
 
 const AdminPage = () => {
   return (
     <div>
-      <Header />
+      {/* <Header /> */}
+      <MainNavigation />
       <div className="container-fluid">
         <div className="row">
-          <Sidebar />
+          {/* <Sidebar /> */}
           <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-4">
             <Route exact path="/" component={DashboardPage} />
 
@@ -44,6 +43,8 @@ const AdminPage = () => {
             <Route exact path="/admins" component={AdminsPage} />
 
             <Route path="/settings" component={SettingsPage} />
+
+            <Redirect to="/" />
           </main>
         </div>
       </div>
