@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/ishan-admin/static/css/main.7323e003.chunk.css",
+    "main.js": "/ishan-admin/static/js/main.8e4dd73f.chunk.js",
+    "main.js.map": "/ishan-admin/static/js/main.8e4dd73f.chunk.js.map",
+    "runtime-main.js": "/ishan-admin/static/js/runtime-main.c2bd7dd2.js",
+    "runtime-main.js.map": "/ishan-admin/static/js/runtime-main.c2bd7dd2.js.map",
+    "static/js/2.71a23a08.chunk.js": "/ishan-admin/static/js/2.71a23a08.chunk.js",
+    "static/js/2.71a23a08.chunk.js.map": "/ishan-admin/static/js/2.71a23a08.chunk.js.map",
+    "index.html": "/ishan-admin/index.html",
+    "precache-manifest.3f883e9129d7a4813928ae35503cc4b7.js": "/ishan-admin/precache-manifest.3f883e9129d7a4813928ae35503cc4b7.js",
+    "service-worker.js": "/ishan-admin/service-worker.js",
+    "static/css/main.7323e003.chunk.css.map": "/ishan-admin/static/css/main.7323e003.chunk.css.map",
+    "static/js/2.71a23a08.chunk.js.LICENSE": "/ishan-admin/static/js/2.71a23a08.chunk.js.LICENSE"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.c2bd7dd2.js",
+    "static/js/2.71a23a08.chunk.js",
+    "static/css/main.7323e003.chunk.css",
+    "static/js/main.8e4dd73f.chunk.js"
+  ]
+}
